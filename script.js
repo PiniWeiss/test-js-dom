@@ -36,7 +36,7 @@ function updateDisplay() {
   }
 }
 
-function diceRoling(player) {
+function diceRoling(currentPlayer) {
   const num1 = Math.floor(Math.random() * 6) + 1;
   const num2 = Math.floor(Math.random() * 6) + 1;
   document.getElementById("rollBtn").addEventListener("click", (e) => {
@@ -48,11 +48,11 @@ function diceRoling(player) {
     h2Dice2.textContent = num2;
     document.querySelector("#dice1 .dice-face .dot").remove();
     document.querySelector("#dice1 .dice-face ").append(h2Dice2);
-    if (player === "player 1") {
+    if (currentPlayer === 0) {
       document.getElementById("player1Total").textContent =
         +document.getElementById("player1Total").textContent + num1 + num2;
       gameState.players[0].total += num1 + num2;
-    } else if (player === "player 2") {
+    } else if (currentPlayer === 1) {
       document.getElementById("player2Total").textContent =
         +document.getElementById("player2Total").textContent + num1 + num2;
       gameState.players[1].total += num1 + num2;
@@ -67,16 +67,11 @@ document.getElementById("holdBtn").addEventListener("click", () => {
 // Switch player
 async function switchPlayer() {
   gameState.currentPlayer = gameState.currentPlayer === 0 ? 1 : 0;
+  
   updateDisplay(gameState.currentPlayer);
+  
 }
 
-// Show message
-function showMessage(text, type = "info") {
-  const messageEl = document.getElementById("resultMessage");
-  messageEl.textContent = text;
-  messageEl.className = `result-message ${type}`;
-  messageEl.style.display = "block";
-}
 
 updateDisplay();
-diceRoling(gameState.players[gameState.currentPlayer].name);
+diceRoling(gameState.currentPlayer);
