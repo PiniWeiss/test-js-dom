@@ -1,356 +1,219 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+:root {
+    --bg-color: #7FCD68; /* רקע ירוק כמו בתמונה */
+    --card-bg: #ffffff;
+    --primary-color: #4a90e2;
+    --success-color: #34c759;
+    --warning-color: #ff9f43;
+    --info-color: #5e72e4;
+    --text-dark: #2d3436;
+    --text-light: #636e72;
+    --player1-bg: #f7e6c4; /* צבע רקע לרון */
+    --player1-accent: #d35400;
+    --player2-bg: #e3f2fd; /* צבע רקע לדני */
+    --player2-accent: #2980b9;
+    --die-size: 80px; /* גודל הקובייה */
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(194deg,rgba(114, 207, 60, 0.83) 100%, rgba(171, 60, 181, 1) 100%);
+    font-family: 'Rubik', 'Segoe UI', sans-serif;
+    background-color: var(--bg-color);
+    margin: 0;
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
     overflow-x: hidden;
 }
 
-.container {
-    background: white;
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    max-width: 800px;
-    width: 100%;
+/* --- מסך פתיחה (Modal) --- */
+.overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 999;
 }
 
-.header {
+.modal-card {
+    background: var(--card-bg);
+    padding: 2.5rem;
+    border-radius: 24px;
     text-align: center;
-    margin-bottom: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    width: 90%; max-width: 400px;
+    border: 4px solid #fff;
 }
 
-.header h1 {
-    color: #2d3748;
+.modal-card h1 { margin-top: 0; color: var(--text-dark); }
+.input-group input {
+    font-size: 1.5rem; padding: 10px; width: 100px;
+    text-align: center; border: 2px solid #ddd; border-radius: 12px;
+    margin-bottom: 20px; font-weight: bold; color: var(--primary-color);
+}
+.hidden { display: none !important; }
+
+/* --- לוח המשחק --- */
+.game-container {
+    background: var(--card-bg);
+    padding: 30px;
+    border-radius: 30px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+    width: 95%; max-width: 800px;
+    text-align: center;
+}
+
+header h1 {
+    color: #2c3e50;
+    margin-bottom: 30px;
     font-size: 2.5rem;
-    margin-bottom: 5px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
 }
 
-.players-section {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+/* --- כרטיסי שחקנים --- */
+.players-area {
+    display: flex;
     gap: 20px;
+    justify-content: center;
     margin-bottom: 30px;
 }
 
 .player-card {
-    background: #f7fafc;
-    border-radius: 15px;
+    flex: 1;
+    background: var(--player2-bg);
+    border-radius: 16px;
     padding: 20px;
-    border: 3px solid #e2e8f0;
+    position: relative;
     transition: all 0.3s ease;
+    border: 3px solid transparent;
 }
+
+#player-0 { background: var(--player1-bg); }
 
 .player-card.active {
-    border-color: #66eab3;
-    box-shadow: 0 8px 30px rgba(13, 78, 67, 0.3);
-    transform: scale(1.02);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
 }
 
-.player-card.winner {
-    animation: winnerPulse 1s ease-in-out infinite;
-}
-
-@keyframes winnerPulse {
-    0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-    }
-    50% {
-        transform: scale(1.05);
-        box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
-    }
-}
-
-.player1-card.active {
-    background: wheat
-}
-
-.player2-card.active {
-    background: wheat
-}
+#player-0.active { border-color: var(--player1-accent); }
+#player-1.active { border-color: var(--player2-accent); }
 
 .player-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 15px;
 }
+.player-header h2 { margin: 0; font-size: 1.2rem; color: var(--text-dark); }
 
-.player-header h3 {
-    color: #336972;
-    font-size: 1.3rem;
+.status-badge {
+    background: var(--success-color); color: white;
+    padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;
+    opacity: 0; transition: opacity 0.3s;
 }
+.status-badge.waiting { background: var(--text-light); }
+.player-card.active .status-badge { opacity: 1; }
 
-.current-turn {
-    background: linear-gradient(90deg,rgba(27, 79, 99, 1) 0%, rgba(50, 110, 73, 1) 50%, rgba(122, 115, 50, 1) 100%);
-    color: white;
-    padding: 6px 15px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: bold;
-}
-
-.player-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+.score-label { color: var(--text-light); font-size: 0.9rem; }
+.total-score {
+    font-size: 3.5rem; font-weight: 800; color: var(--text-dark);
+    line-height: 1; margin-top: 5px;
 }
 
-.stat {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+/* --- קוביות תלת-ממד (3D Dice) --- */
+.dice-arena {
+    display: flex; justify-content: center; gap: 40px;
+    margin: 40px 0; perspective: 1000px;
 }
 
-.stat-label {
-    color: #718096;
-    font-size: 0.95rem;
-    font-weight: 600;
+.scene {
+    width: var(--die-size); height: var(--die-size);
+    perspective: 600px;
 }
 
-.stat-value {
-    color: #2d3748;
-    font-size: 1.8rem;
-    font-weight: bold;
-}
-
-.dice-container {
-    display: flex;
-    justify-content: space-evenly;
-    margin-bottom: 30px;
-}
-
-.dice {
-    width: 120px;
-    height: 120px;
-    perspective: 1000px;
-}
-
-#dice2 .dice-face {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-#dice2 .dice-face h2{
-    font-size: 3rem;font-family: "Segoe Script";
-    font-family: "Segoe Script";
-}
-#dice1 .dice-face {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-#dice1 .dice-face h2{
-    font-size: 3rem;font-family: "Segoe Script";
-    font-family: "Segoe Script";
-}
-
-.dice.rolling {
-    animation: diceRoll 0.5s ease-in-out;
-}
-
-@keyframes diceRoll {
-    0%, 100% {
-        transform: rotateX(0) rotateY(0);
-    }
-    25% {
-        transform: rotateX(180deg) rotateY(180deg);
-    }
-    50% {
-        transform: rotateX(360deg) rotateY(360deg);
-    }
-    75% {
-        transform: rotateX(540deg) rotateY(540deg);
-    }
-}
-
-.dice-face {
-    width: 100%;
-    height: 100%;
-    background: white;
-    border: 4px solid #2d3748;
-    border-radius: 15px;
+.cube {
+    width: 100%; height: 100%;
     position: relative;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    transform-style: preserve-3d;
+    transform: translateZ(calc(var(--die-size) / -2));
+    transition: transform 1s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.dot {
-    width: 20px;
-    height: 20px;
-    background: #2d3748;
-    border-radius: 50%;
+.cube.rolling {
+    animation: rollDice 0.6s linear infinite;
+}
+
+@keyframes rollDice {
+    0% { transform: translateZ(calc(var(--die-size) / -2)) rotateX(0deg) rotateY(0deg); }
+    100% { transform: translateZ(calc(var(--die-size) / -2)) rotateX(360deg) rotateY(360deg); }
+}
+
+.cube__face {
     position: absolute;
-    transform: translate(-50%, -50%);
-    left: 50%;
-    top: 50%;
+    width: var(--die-size); height: var(--die-size);
+    border-radius: 16px;
+    background: white;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
+    border: 2px solid #ecf0f1;
+    display: flex; justify-content: center; align-items: center;
 }
 
-.controls {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
+/* נקודות על הקוביות */
+.cube__face::before {
+    content: ''; display: block;
+    background-color: #333; box-shadow: inset 0 3px #111;
+    border-radius: 50%;
+}
+
+/* מיקום הפאות במרחב */
+.cube__face--1 { transform: rotateY(  0deg) translateZ(calc(var(--die-size) / 2)); }
+.cube__face--2 { transform: rotateY( 90deg) translateZ(calc(var(--die-size) / 2)); }
+.cube__face--3 { transform: rotateY(180deg) translateZ(calc(var(--die-size) / 2)); }
+.cube__face--4 { transform: rotateY(-90deg) translateZ(calc(var(--die-size) / 2)); }
+.cube__face--5 { transform: rotateX( 90deg) translateZ(calc(var(--die-size) / 2)); }
+.cube__face--6 { transform: rotateX(-90deg) translateZ(calc(var(--die-size) / 2)); }
+
+/* סידור הנקודות לכל מספר */
+.cube__face--1::before { width: 24%; height: 24%; }
+.cube__face--2::before { width: 18%; height: 18%; box-shadow: -25px -25px #333, 25px 25px #333; }
+.cube__face--3::before { width: 18%; height: 18%; box-shadow: -25px -25px #333, 0 0 #333, 25px 25px #333; }
+.cube__face--4::before { width: 18%; height: 18%; box-shadow: -25px -25px #333, 25px -25px #333, -25px 25px #333, 25px 25px #333; }
+.cube__face--5::before { width: 18%; height: 18%; box-shadow: -25px -25px #333, 25px -25px #333, 0 0 #333, -25px 25px #333, 25px 25px #333; }
+.cube__face--6::before { width: 18%; height: 18%; box-shadow: -25px -25px #333, 25px -25px #333, -25px 0 #333, 25px 0 #333, -25px 25px #333, 25px 25px #333; }
+
+/* --- כפתורים --- */
+.controls-area {
+    display: flex; justify-content: center; gap: 15px;
+    margin-top: 30px;
 }
 
 .btn {
-    padding: 15px 30px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 160px;
-    justify-content: center;
+    border: none; padding: 15px 30px; border-radius: 12px;
+    font-size: 1.1rem; font-weight: bold; color: white; cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex; align-items: center; gap: 8px;
 }
+.btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+.btn:active { transform: translateY(-1px); }
+.btn-primary { background-color: var(--primary-color); }
+.btn-success { background-color: var(--success-color); }
+.btn-warning { background-color: var(--warning-color); }
+.btn-info { background-color: var(--info-color); }
+.btn-lg { font-size: 1.3rem; padding: 15px 40px; width: 100%; justify-content: center; }
 
-.btn:hover:not(:disabled) {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+/* --- הודעות קופצות --- */
+.message-popup {
+    position: fixed; top: 20%;
+    background: #e74c3c; color: white;
+    padding: 18px 35px; border-radius: 50px;
+    font-weight: bold; font-size: 1.2rem;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    z-index: 1000; animation: slideInDown 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
 }
+@keyframes slideInDown { from { transform: translateY(-150%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-.btn:active:not(:disabled) {
-    transform: translateY(0);
-}
-
-.btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.btn-icon {
-    font-size: 1.5rem;
-}
-
-.btn-roll {
-    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-    color: white;
-}
-
-.btn-hold {
-    background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
-    color: white;
-}
-
-.btn-new {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    text-decoration: none;
-}
-
-.result-message {
-    text-align: center;
-    padding: 15px;
-    border-radius: 10px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin-bottom: 20px;
-    display: none;
-}
-
-.result-message.success {
-    background: #c6f6d5;
-    color: #22543d;
-    border: 2px solid #9ae6b4;
-}
-
-.result-message.error {
-    background: #fed7d7;
-    color: #742a2a;
-    border: 2px solid #fc8181;
-}
-
-.result-message.info {
-    background: #bee3f8;
-    color: #2c5282;
-    border: 2px solid #90cdf4;
-}
-
-.confetti {
-    position: fixed;
-    width: 10px;
-    height: 10px;
-    top: -10px;
-    z-index: 9999;
-    animation: confettiFall linear forwards;
-}
-
-@keyframes confettiFall {
-    to {
-        transform: translateY(100vh) rotate(720deg);
-    }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .container {
-        padding: 20px;
-    }
-
-    .header h1 {
-        font-size: 2rem;
-    }
-
-    .players-section {
-        grid-template-columns: 1fr;
-    }
-
-    .game-mode {
-        flex-direction: column;
-    }
-
-    .mode-btn {
-        width: 100%;
-    }
-
-    .controls {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .btn {
-        min-width: unset;
-    }
-}
-
-@media (max-width: 480px) {
-    .header h1 {
-        font-size: 1.5rem;
-    }
-
-    .dice {
-        width: 100px;
-        height: 100px;
-    }
-
-    .dot {
-        width: 16px;
-        height: 16px;
-    }
-
-    .btn {
-        padding: 12px 20px;
-        font-size: 1rem;
-    }
-
-    .btn-icon {
-        font-size: 1.2rem;
-    }
+/* התאמה למובייל */
+@media (max-width: 600px) {
+    .players-area { flex-direction: column; }
+    .controls-area { flex-wrap: wrap; }
+    .btn { flex: 1 1 40%; padding: 12px; font-size: 1rem; }
+    .game-container { padding: 20px; }
+    :root { --die-size: 60px; }
 }
